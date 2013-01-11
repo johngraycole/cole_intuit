@@ -1,0 +1,27 @@
+@CHARSET "ISO-8859-1";
+
+#header ul {
+	list-style: none;
+	padding:0;
+	margin:0;
+}
+
+#header li {
+	display: inline;
+	border: solid;
+	border-width: 1px 1px 0 1px;
+	margin: 0 0.5em 0 0;
+}
+
+#header li a {
+	padding: 0 1em;
+}
+
+#content {
+	border: 1px solid;
+}
+
+#header #selected {
+	padding-bottom: 1px; 
+	background: white;
+}

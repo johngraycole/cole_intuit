@@ -1,0 +1,10 @@
+*~
+*.swp
+*.class
+*.war
+.project
+.classpath
+.externalToolBuilders*
+dist/
+docs/
+*/cole_intuit.properties

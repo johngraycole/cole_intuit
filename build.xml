@@ -1,0 +1,61 @@
+
+<project name="cole_intuit" default="default" basedir=".">
+    <description>
+        Cole Intuit project build script
+    </description>
+  <!-- set global properties for this build -->
+  <property name="dest.dir" location="dist"/>
+  <property name="src" location="src"/>
+  <property name="web" location="web"/>
+  <property name="meta-inf" location="web/META-INF"/>
+  <property name="web-inf" location="web/WEB-INF"/>
+  <property name="lib" location="${web-inf}/lib"/>
+  <property name="tomcat.deploy" location="/var/lib/tomcat6/webapps/"/>
+  <property name="war.file" location="Cole_Intuit.war"/>
+
+  <target name="default" depends="setup,compile,buildwar">
+  </target>
+
+  <target name="setup">
+    <mkdir dir="${dest.dir}" />
+    <echo>Copying web into ${dest.dir}</echo>
+    <copy todir="${dest.dir}/web">
+		<fileset dir="${web}" />
+	</copy>
+  </target>  
+
+  <target name="compile">
+    <delete dir="${dest.dir}/web/WEB-INF/classes" />
+    <mkdir dir="${dest.dir}/web/WEB-INF/classes" />
+    <javac includeantruntime="false" destdir="${dest.dir}/web/WEB-INF/classes" srcdir="${src}">
+        <classpath>
+            <fileset dir="${lib}">
+                  <include name="*" />
+            </fileset>
+        </classpath>
+    </javac>
+    <copy todir="${dest.dir}/web/WEB-INF/classes">
+        <fileset dir="src">
+            <include name="**/*.properties" />
+            <include name="**/*.xml" />
+        </fileset>
+    </copy>
+  </target>
+
+  <target name="buildwar">
+    <war basedir="${dest.dir}/web" destfile="${war.file}"
+     webxml="${dest.dir}/web/WEB-INF/web.xml">
+        <webinf dir="${dest.dir}/web/WEB-INF/">
+            <include name="**/*.jar" />
+        </webinf>
+    </war>
+  </target>
+
+  <target name="clean"
+        description="clean up" >
+    <delete dir="${dest.dir}"/>
+	<delete file="${war.file}" />
+  </target>
+</project>
+
+
