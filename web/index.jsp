@@ -29,7 +29,8 @@
 		<p>The OAuth flow has been completed. Because the app now has an authorized access token, 
 			it can access QuickBooks data by making calls to Data Services.</p>
 		<ul>
-			<li><a href="displayaccounts.jsp">Display All QuickBooks Accounts</a></li>
+			<li><a href="accounts.jsp">Display All QuickBooks Accounts</a></li>
+			<li><a href="accountbalances.jsp">Query Account Balances</a></li>
 			<li><a href="disconnect.jsp">Disconnect from QuickBooks Intuit</a></li>
 		</ul> 
 
