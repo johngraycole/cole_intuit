@@ -82,7 +82,11 @@ public class QueryManager {
 				result.setVal(i, 1, accounts.get(i).getName());
 				result.setVal(i, 2, "??");
 				result.setVal(i, 3, "??");
-				result.setVal(i, 4, "??");
+				java.math.BigDecimal bal = accounts.get(i).getCurrentBalance();
+				if (bal == null) 
+				    result.setVal(i, 4, "??");
+				else
+				    result.setVal(i, 4, bal.toString());
 			}
 			
 		} catch (Exception ex) {
