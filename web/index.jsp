@@ -31,6 +31,7 @@
 		<ul>
 			<li><a href="accounts.jsp">Display All QuickBooks Accounts</a></li>
 			<li><a href="accountbalances.jsp">Query Account Balances</a></li>
+			<li><a href="transactions.jsp">Query Account Transactions</a></li>
 			<li><a href="disconnect.jsp">Disconnect from QuickBooks Intuit</a></li>
 		</ul> 
 
