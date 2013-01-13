@@ -69,17 +69,17 @@ public class QueryManager {
 				if (beg_bal == null)
 					result.setVal(i, 2, "??");
 				else
-					result.setVal(i, 2, "$"+beg_bal);
+				    result.setVal(i, 2, "$"+beg_bal.toString());
 				
 				if (beg_bal == null || end_bal == null)
 					result.setVal(i, 3, "??");
 				else
-					result.setVal(i, 3, "$"+end_bal.subtract(beg_bal));
+				    result.setVal(i, 3, "$"+end_bal.subtract(beg_bal).toString());
 
 				if (end_bal == null)
 					result.setVal(i, 4, "??");
 				else
-					result.setVal(i, 4, "$"+end_bal);
+				    result.setVal(i, 4, "$"+end_bal.toString());
 			}
 
 		} catch (Exception ex) {
