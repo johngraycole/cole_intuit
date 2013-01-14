@@ -6,7 +6,7 @@ PROJECT="Cole_Intuit"
 
 sudo service tomcat6 stop
 sudo rm -rf ${TOMCAT_PATH}${PROJECT}*
-cp ${PROJECT}.war ${TOMCAT_PATH}
+sudo cp ${PROJECT}.war ${TOMCAT_PATH}
 sudo service tomcat6 start
 
 
