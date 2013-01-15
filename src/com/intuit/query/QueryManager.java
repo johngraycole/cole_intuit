@@ -8,9 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import com.intuit.ds.qb.QBAccount;
-import com.intuit.ds.qb.QBAccountService;
-import com.intuit.ds.qb.QBServiceFactory;
+import com.intuit.ds.qb.*;
 import com.intuit.platform.client.PlatformSessionContext;
 import com.intuit.result.AnalysisResult;
 import com.intuit.result.AnalysisResult.ColumnJustify;
@@ -24,9 +22,15 @@ public class QueryManager {
 
 	public QBAccount GetAccount(String acctnum) throws Exception {
 		List<QBAccount> accounts = getAllAccounts();
-		for (QBAccount acct : accounts)
-			if (acct.getAcctNum().equals(acctnum.trim()))
-				return acct;
+		for (QBAccount acct : accounts) {
+			if (acct.getAcctNum() != null) {
+				//System.out.println("Compare: <"+acct.getAcctNum() + "><"+acctnum+">");
+				if (acct.getAcctNum().equals(acctnum.trim())) {
+					System.out.println("GetAccount(): "+acctnum+" -> "+acct.getName());
+					return acct;
+				}
+			}
+		}
 		return null;
 	}
 
@@ -35,7 +39,8 @@ public class QueryManager {
 		try {
 
 			SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yy");
-			System.out.println("AccountBalances(" + sdf.format(begDate.getTime()) + ","
+			System.out.println("AccountBalances("
+					+ sdf.format(begDate.getTime()) + ","
 					+ sdf.format(endDate.getTime()) + ")");
 
 			List<QBAccount> accounts = getAllAccounts();
@@ -65,21 +70,22 @@ public class QueryManager {
 
 				BigDecimal beg_bal = GetBalanceAtDate(accounts.get(i), begDate);
 				BigDecimal end_bal = GetBalanceAtDate(accounts.get(i), endDate);
-				
+
 				if (beg_bal == null)
 					result.setVal(i, 2, "??");
 				else
-				    result.setVal(i, 2, "$"+beg_bal.toString());
-				
+					result.setVal(i, 2, "$" + beg_bal.toString());
+
 				if (beg_bal == null || end_bal == null)
 					result.setVal(i, 3, "??");
 				else
-				    result.setVal(i, 3, "$"+end_bal.subtract(beg_bal).toString());
+					result.setVal(i, 3, "$"
+							+ end_bal.subtract(beg_bal).toString());
 
 				if (end_bal == null)
 					result.setVal(i, 4, "??");
 				else
-				    result.setVal(i, 4, "$"+end_bal.toString());
+					result.setVal(i, 4, "$" + end_bal.toString());
 			}
 
 		} catch (Exception ex) {
@@ -133,15 +139,71 @@ public class QueryManager {
 	}
 
 	public BigDecimal GetBalanceAtDate(QBAccount acct, Calendar reqDate) {
-		//TODO implement this function
+		Calendar now = Calendar.getInstance();
+		now.add(Calendar.HOUR_OF_DAY, -now.get(Calendar.HOUR_OF_DAY));
+		now.add(Calendar.MINUTE, -now.get(Calendar.MINUTE));
+		now.add(Calendar.SECOND, -now.get(Calendar.SECOND));
+		now.add(Calendar.MILLISECOND, -now.get(Calendar.MILLISECOND));
+		now.add(Calendar.DATE, 1);
+
+		// TODO: get all transactions between "reqDate" and "now"
+
 		return null;
 	}
 
-	public AnalysisResult GetTransactions(QBAccount acct, Calendar begin, Calendar end) {
-		//TODO: implement this function
-		AnalysisResult result = new AnalysisResult(1,1);
+	public AnalysisResult GetTransactions(QBAccount acct, Calendar begin,
+			Calendar end) {
+		// TODO: implement this function
+		AnalysisResult result = new AnalysisResult(1, 1);
 		result.setErrorMsg("GetTransactions not implemented");
 		return result;
+	}
+
+	public void ScratchSpace(QBAccount acct) throws Exception {
+		System.out.println(">>>");
+		System.out.println(">>>");
+		System.out.println(">>>");
+		System.out.println(">>> Account:");
+		System.out.println("\tNum: "+acct.getAcctNum());
+		System.out.println("\tName: "+acct.getName());
+		System.out.println("\tId: "+acct.getId().getValue());
+		System.out.println("\tType: "+acct.getType());
+		System.out.println("\tCurrBal: "+acct.getCurrentBalance().toString());
+		
+		// start with the Bills
+		QBBillService billdb = QBServiceFactory.getService(_context,
+				QBBillService.class);
+		List<QBBill> bills = new ArrayList<QBBill>();
+		int page = 1, maxpages = 100;
+		System.out.println(">>>Querying Bills table...");
+		while (true) {
+			List<QBBill> list = billdb.findAll(_context, page, maxpages);
+			System.out.println(">>>found "+list.size());
+			bills.addAll(list);
+			if (list.size() < maxpages)
+				break;
+			page++;
+		}
+		System.out.println(">>>Found "+bills.size()+" total records in Bills");
+		int toexamine = Math.min(10, bills.size());
+		System.out.println(">>>Examining first "+toexamine+" records...");
+		
+		for (int i=0; i<toexamine; i++) {
+			QBBill bill = bills.get(i);
+			List<BillLine> lines = bill.getLine();
+
+			System.out.println(">>>Bill Id: "+bill.getId().getValue());
+			System.out.println(">>>Num Lines: "+lines.size());
+			for (BillLine line : lines) {
+				System.out.println("\tAcctName: "+line.getAccountName());
+				System.out.println("\tAcctId: "+line.getAccountId().getValue());
+				System.out.println("\tAmount: "+line.getAmount().toString());
+			}
+		}
+		
+		System.out.println(">>>");
+		System.out.println(">>>");
+		System.out.println(">>>");
 	}
 
 	private List<QBAccount> getAllAccounts() throws Exception {
@@ -153,22 +215,27 @@ public class QueryManager {
 		int page = 1, maxpages = 100;
 		while (true) {
 			List<QBAccount> list = db.findAll(_context, page, maxpages);
-			System.out.println("getAllAccounts: found " + list.size()
-					+ " accounts on page " + page);
+			if (list == null)
+				break;
+			System.out.println("getAllAccounts() -> found "+list.size());
 			accounts.addAll(list);
 			if (list.size() < maxpages)
 				break;
 			page++;
 		}
-
+		
 		Collections.sort(accounts, new Comparator<QBAccount>() {
 			public int compare(QBAccount a1, QBAccount a2) {
 				if (a1.getAcctNum() == null)
-					return -1;
+					return (a2.getAcctNum()==null ? 0 : -1);
+				if (a2.getAcctNum() == null)
+					return 1;
 				return a1.getAcctNum().compareTo(a2.getAcctNum());
 			}
 		});
 
+		System.out.println("getAllAccounts: query returned " + accounts.size()
+				+ " accounts");
 		return accounts;
 	}
 }
