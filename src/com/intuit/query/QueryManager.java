@@ -174,13 +174,13 @@ public class QueryManager {
 		QBBillService billdb = QBServiceFactory.getService(_context,
 				QBBillService.class);
 		List<QBBill> bills = new ArrayList<QBBill>();
-		int page = 1, maxpages = 100;
+		int page = 1, pagemax = 100;
 		System.out.println(">>>Querying Bills table...");
 		while (true) {
-			List<QBBill> list = billdb.findAll(_context, page, maxpages);
+			List<QBBill> list = billdb.findAll(_context, page, pagemax);
 			System.out.println(">>>found "+list.size());
 			bills.addAll(list);
-			if (list.size() < maxpages)
+			if (list.size() < pagemax)
 				break;
 			page++;
 		}
@@ -191,8 +191,12 @@ public class QueryManager {
 		for (int i=0; i<toexamine; i++) {
 			QBBill bill = bills.get(i);
 			List<BillLine> lines = bill.getLine();
-
+			BillHeader head = bill.getHeader();
 			System.out.println(">>>Bill Id: "+bill.getId().getValue());
+			System.out.println(">>>Bill Header: "+head.getAPAccountId().getValue());
+			System.out.println(">>>Bill Header Amount: "+head.getTotalAmt().toString());
+			System.out.println(">>>Bill Header Txn Date: "+head.getTxnDate());
+			System.out.println(">>>BillLines --------: ");
 			System.out.println(">>>Num Lines: "+lines.size());
 			for (BillLine line : lines) {
 				System.out.println("\tAcctName: "+line.getAccountName());
