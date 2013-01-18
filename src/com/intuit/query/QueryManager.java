@@ -1,14 +1,18 @@
 package com.intuit.query;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Date;
 
 import com.intuit.ds.qb.*;
+import com.intuit.ds.qb.impl.QBBillImpl;
+import com.intuit.ds.qb.qbo.QBOBillService;
 import com.intuit.platform.client.PlatformSessionContext;
 import com.intuit.result.AnalysisResult;
 import com.intuit.result.AnalysisResult.ColumnJustify;
@@ -170,16 +174,33 @@ public class QueryManager {
 		System.out.println("\tType: "+acct.getType());
 		System.out.println("\tCurrBal: "+acct.getCurrentBalance().toString());
 		
+		SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
 		// start with the Bills
 		QBBillService billdb = QBServiceFactory.getService(_context,
 				QBBillService.class);
+		SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy");
+		Date date = formatter.parse("01-01-2013");
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		/*
+		QBBillQuery billq = billdb.getQBObject(_context, QBBillQuery.class);
+		billq.setChunkSize(100);
+		billq.setStartPage(new BigInteger("1"));
+		billq.setStartDueDate(cal);
+		*/
 		List<QBBill> bills = new ArrayList<QBBill>();
 		int page = 1, pagemax = 100;
 		System.out.println(">>>Querying Bills table...");
 		while (true) {
 			List<QBBill> list = billdb.findAll(_context, page, pagemax);
 			System.out.println(">>>found "+list.size());
-			bills.addAll(list);
+			for (int i=0; i<list.size(); i++) {
+			    QBBill test = list.get(i);
+			    BillHeader thead = test.getHeader();
+			    if (thead.getTxnDate().after(cal))
+				bills.add(test);
+			}
+			    //bills.addAll(list);
 			if (list.size() < pagemax)
 				break;
 			page++;
@@ -188,14 +209,18 @@ public class QueryManager {
 		int toexamine = Math.min(10, bills.size());
 		System.out.println(">>>Examining first "+toexamine+" records...");
 		
+
 		for (int i=0; i<toexamine; i++) {
 			QBBill bill = bills.get(i);
 			List<BillLine> lines = bill.getLine();
 			BillHeader head = bill.getHeader();
 			System.out.println(">>>Bill Id: "+bill.getId().getValue());
-			System.out.println(">>>Bill Header: "+head.getAPAccountId().getValue());
+			System.out.println(">>>Bill Header AP Acct ID: "+head.getAPAccountId().getValue());
+			System.out.println(">>>Bill Hdr AP Acct Name: "+head.getAPAccountName());
 			System.out.println(">>>Bill Header Amount: "+head.getTotalAmt().toString());
-			System.out.println(">>>Bill Header Txn Date: "+head.getTxnDate());
+			String date_str = sdf.format(head.getTxnDate().getTime()).toString();
+			System.out.println(">>>Bill Header Txn Date: "+date_str);
+			//System.out.println(">>>Bill Header Txn Date: "+head.getTxnDate());
 			System.out.println(">>>BillLines --------: ");
 			System.out.println(">>>Num Lines: "+lines.size());
 			for (BillLine line : lines) {
