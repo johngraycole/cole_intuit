@@ -12,7 +12,12 @@ import java.util.Date;
 
 import com.intuit.ds.qb.*;
 import com.intuit.ds.qb.impl.QBBillImpl;
+import com.intuit.ds.qb.impl.BillPaymentLineImpl;
 import com.intuit.ds.qb.qbo.QBOBillService;
+import com.intuit.ds.qb.impl.CompanyMetaDataImpl;
+import com.intuit.ds.qb.impl.CompaniesMetaDataImpl;
+import com.intuit.sb.cdm.qbo.v2.CompaniesMetaData;
+import com.intuit.sb.cdm.qbo.v2.CompanyMetaData;
 import com.intuit.platform.client.PlatformSessionContext;
 import com.intuit.result.AnalysisResult;
 import com.intuit.result.AnalysisResult.ColumnJustify;
@@ -174,6 +179,23 @@ public class QueryManager {
 		System.out.println("\tType: "+acct.getType());
 		System.out.println("\tCurrBal: "+acct.getCurrentBalance().toString());
 		
+		// test access to CompanyMetaData
+      
+		CompaniesMetaDataImpl mdata = new CompaniesMetaDataImpl(_context);
+		CompaniesMetaData cosqbomd = mdata.getQboCompaniesMetaData();
+		List<CompanyMetaData> cosqbomdList = cosqbomd.getCompanyMetaData();
+		if (cosqbomdList.size() == 0) {
+		    System.out.println(">>>");
+		    System.out.println(">>> No LUCK getting Company Meta Data:");
+		} else {
+		    CompanyMetaData qbomd = cosqbomdList.get(0);
+		    System.out.println(">>>");
+		    System.out.println(">>> Company Meta Data:");
+		    System.out.println("\tFiscal Year Start: "+qbomd.getFiscalYearStart());
+		    System.out.println("\tTax Year Start: "+qbomd.getIncomeTaxYearStart());
+		    System.out.println("\tTax ID: "+qbomd.getTaxIdentifier());
+		}
+
 		SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
 		// start with the Bills
 		QBBillService billdb = QBServiceFactory.getService(_context,
@@ -186,6 +208,7 @@ public class QueryManager {
 		QBBillQuery billq = billdb.getQBObject(_context, QBBillQuery.class);
 		billq.setChunkSize(100);
 		billq.setStartPage(new BigInteger("1"));
+
 		billq.setStartDueDate(cal);
 		*/
 		List<QBBill> bills = new ArrayList<QBBill>();
@@ -233,6 +256,50 @@ public class QueryManager {
 		System.out.println(">>>");
 		System.out.println(">>>");
 		System.out.println(">>>");
+		
+		// now look at bill payments
+		QBBillPaymentService bpdb = QBServiceFactory.getService(_context,
+						  QBBillPaymentService.class);
+		List<QBBillPayment> payments = new ArrayList<QBBillPayment>();
+		page = 1;
+		System.out.println(">>>Querying Bill Payments table...");
+		while (true) {
+			List<QBBillPayment> plist = bpdb.findAll(_context, page, pagemax);
+			System.out.println(">>>found "+plist.size());
+			for (int i=0; i<plist.size(); i++) {
+			    QBBillPayment bptest = plist.get(i);
+			    BillPaymentHeader pthead = bptest.getHeader();
+			    if (pthead.getTxnDate().after(cal))
+				payments.add(bptest);
+			}
+			    //bills.addAll(list);
+			if (plist.size() < pagemax)
+				break;
+			page++;
+		}
+		System.out.println(">>>Found "+payments.size()+" total records in Bill Payments");
+		toexamine = Math.min(10, payments.size());
+		System.out.println(">>>Examining first "+toexamine+" records...");
+		
+		for (int i=0; i<toexamine; i++) {
+			QBBillPayment pmt = payments.get(i);
+			List<BillPaymentLine> plines = pmt.getLine();
+			BillPaymentHeader phead = pmt.getHeader();
+			System.out.println(">>>BillPmtHdr APAcctId: "+phead.getAPAccountId().getValue());
+			System.out.println(">>>BillPmtHdr BankAcctId: "+phead.getBankAccountId().getValue());
+			System.out.println(">>>Bill Pmt Hdr AP Acct Name: "+phead.getAPAccountName());
+			System.out.println(">>>Bill Pmt Hdr Bank Acct Name: "+phead.getBankAccountName());
+			System.out.println(">>>Bill Pmt Header Amount: "+phead.getTotalAmt().toString());
+			String date_str = sdf.format(phead.getTxnDate().getTime()).toString();
+			System.out.println(">>>Bill Pmt Header Txn Date: "+date_str);
+			//System.out.println(">>>Bill Header Txn Date: "+head.getTxnDate());
+			System.out.println(">>>BillHeaderLines --------: ");
+			System.out.println(">>>Num Lines: "+plines.size());
+			for (BillPaymentLine pline : plines) {
+			    System.out.println("\tDescription: "+pline.getDesc());
+				System.out.println("\tAmount: "+pline.getAmount().toString());
+			}
+		}
 	}
 
 	private List<QBAccount> getAllAccounts() throws Exception {
