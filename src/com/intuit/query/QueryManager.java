@@ -280,16 +280,33 @@ public class QueryManager {
 		System.out.println(">>>Found "+payments.size()+" total records in Bill Payments");
 		toexamine = Math.min(10, payments.size());
 		System.out.println(">>>Examining first "+toexamine+" records...");
-		
 		for (int i=0; i<toexamine; i++) {
 			QBBillPayment pmt = payments.get(i);
 			List<BillPaymentLine> plines = pmt.getLine();
 			BillPaymentHeader phead = pmt.getHeader();
-			System.out.println(">>>BillPmtHdr APAcctId: "+phead.getAPAccountId().getValue());
-			System.out.println(">>>BillPmtHdr BankAcctId: "+phead.getBankAccountId().getValue());
-			System.out.println(">>>Bill Pmt Hdr AP Acct Name: "+phead.getAPAccountName());
-			System.out.println(">>>Bill Pmt Hdr Bank Acct Name: "+phead.getBankAccountName());
+			// find non null values
+			if (phead.getAPAccountId().getValue() != null)
+			    System.out.println(">>>BillPmtHdr APAcctId: "+phead.getAPAccountId().getValue());
+			if (phead.getAPAccountName() != null)
+			    System.out.println(">>>Bill Pmt Hdr AP Acct Name: "+phead.getAPAccountName());
+			if (phead.getBankAccountId().getValue() != null)
+			    System.out.println(">>>BillPmtHdr BankAcctId: "+phead.getBankAccountId().getValue());
+			if (phead.getBankAccountName() != null)
+			    System.out.println(">>>Bill Pmt Hdr Bank Acct Name: "+phead.getBankAccountName());
 			System.out.println(">>>Bill Pmt Header Amount: "+phead.getTotalAmt().toString());
+			if (phead.getCCAccountId().getValue() != null)
+			    System.out.println(">>>BillPmtHdr CCAcctId: "+phead.getCCAccountId().getValue());
+			if (phead.getCCAccountName() != null)
+			    System.out.println(">>>Bill Pmt Hdr CC Acct Name: "+phead.getCCAccountName());
+			if (phead.getEntityId().getValue() != null)
+			    System.out.println(">>>BillPmtHdr EntityId: "+phead.getEntityId().getValue());
+			if (phead.getEntityName() != null)
+			  System.out.println(">>>Bill Pmt Hdr Entity Name: "+phead.getEntityName());
+			if (phead.getEntityType() != null)
+			  System.out.println(">>>Bill Pmt Hdr Entity Type: "+phead.getEntityType().value());
+			//if (phead.getPayeeAddr() != null)
+			// System.out.println(">>>Bill Pmt Hdr Payee City: "+phead.getPayeeAddr().getCity());
+			System.out.println(">>>11 possible header fields all others are empty --------: ");
 			String date_str = sdf.format(phead.getTxnDate().getTime()).toString();
 			System.out.println(">>>Bill Pmt Header Txn Date: "+date_str);
 			//System.out.println(">>>Bill Header Txn Date: "+head.getTxnDate());
