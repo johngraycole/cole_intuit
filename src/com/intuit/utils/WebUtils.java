@@ -14,7 +14,9 @@ package com.intuit.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Calendar;
 import java.util.Properties;
+import java.text.SimpleDateFormat;
 
 import com.intuit.ds.qb.qbo.QBOService;
 import com.intuit.platform.client.PlatformServiceType;
@@ -62,6 +64,18 @@ public class WebUtils {
 			value = propconfig.getProperty(key);
 		}
 		return value;
+	}
+	
+	public Calendar getFiscalYearStart() {
+		try {
+			String fy_start = getProps("fiscal_year_start");
+			Calendar cal = Calendar.getInstance();
+			SimpleDateFormat sdf = new SimpleDateFormat("MM-dd");
+			cal.setTime(sdf.parse(fy_start));
+			return cal;
+		} catch (Exception ex) {
+			return null;
+		}
 	}
 
 	public String getappToken() {

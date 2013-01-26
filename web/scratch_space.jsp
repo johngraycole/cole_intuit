@@ -2,6 +2,7 @@
 <%@ page import="com.intuit.platform.client.PlatformSessionContext, 
 				com.intuit.utils.WebUtils,
 				com.intuit.query.QueryManager, 
+				com.intuit.cole.ColeAccounting, 
 				com.intuit.ds.qb.QBAccount" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -40,7 +41,7 @@
 				QBAccount acct = qm.GetAccount(acctnum);
 				if (acct == null)
 					throw new Exception("Acct# "+acctnum+" not found");
-				qm.ScratchSpace(acct);
+				ColeAccounting.ScratchSpace(qm, acct);
 				out.println("<p>Were you watching?</p>");
 			} catch (Exception ex) {
 				out.print("<p><b>ERROR: "+ex.getMessage()+"</b></p>");

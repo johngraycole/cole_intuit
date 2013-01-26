@@ -1,12 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
 <%@ page import="com.intuit.platform.client.PlatformSessionContext, 
 				com.intuit.utils.WebUtils,
+				com.intuit.utils.ColeUtils,
 				com.intuit.query.QueryManager, 
-				com.intuit.result.AnalysisResult,
-				com.intuit.result.AnalysisResult.ColumnJustify,
+				com.intuit.data.GLTrans,
+				com.intuit.cole.ColeAccounting,
 				com.intuit.ds.qb.QBAccount,
 				java.math.BigDecimal,
 				java.util.Calendar,
+				java.util.List,
 				java.text.SimpleDateFormat" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -50,18 +52,21 @@
 			Calendar beginCal = Calendar.getInstance();
 			Calendar endCal = Calendar.getInstance();
 			try {
-				acct = qm.GetAccount(acctnum);
-				if (acct == null)
-					throw new Exception("Acct# "+acctnum+" not found");
+				// check valid dates
 				SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yy");
 				beginCal.setTime(sdf.parse(beg));
 				endCal.setTime(sdf.parse(end));
-
-				Calendar acct_beg = acct.getOpeningBalanceDate();
-				if (acct_beg == null)
-					throw new Exception("Acct# "+acctnum+" has null Begin Bal Date");
 				if (beginCal.after(endCal))
 					throw new Exception("Begin Date must come before End Date");
+				if (ColeUtils.CoversFYStart(beginCal, endCal, webutils))
+					throw new Exception("Dates cannot span Fiscal Year start");
+
+				// check valid account number
+				if (acctnum.length() == 0)
+					throw new Exception("Please enter Acct#");
+				acct = qm.GetAccount(acctnum);
+				if (acct == null)
+					throw new Exception("Acct# "+acctnum+" not found");
 			} catch (Exception ex) {
 				out.print("<p><b>ERROR: "+ex.getMessage()+"</b></p>");
 				good = false;
@@ -70,48 +75,27 @@
 			if (good) {
 				out.println("<p><b>Account: " + acctnum + " ("+acct.getName()+")</b></p>");
 				
-				BigDecimal beg_bal = qm.GetBalanceAtDate( acct, beginCal );
+				BigDecimal beg_bal = ColeAccounting.GetBalanceAtDate( qm, acct, beginCal );
 				out.println("<p><b>Begin Date: " + beg + ", Balance: $" + beg_bal.toString() + "</b></p>");
 				
-				AnalysisResult result = qm.GetTransactions(acct, beginCal, endCal);
-				String errmsg = result.getErrorMsg();
-				if (errmsg != null && errmsg.length() > 0) {
-					out.println("<p><b>ERROR: " + errmsg + "</b></p>");
-				} else {
-					// now ready to display the result
-					out.print("<table>");
-					for (int i=0; i<result.getNumCols(); i++)
-						out.print("<col width='" + result.getColWidth(i) + "'>");
-					out.println();
+				List<GLTrans> txns = ColeAccounting.GetAllTransactions(qm, acct, beginCal, endCal);
+									
+				// now ready to display the result
+				out.print("<table>");
+				out.println("<col width='100'><col width='250'><col width='150'><col width='150'>");
+				out.println("<tr><th>Source</th><th>Description</th><th>Date</th><th>Amount</th></tr>");
+	
+				for (GLTrans txn : txns) {
 					out.print("<tr>");
-					for (int i=0; i<result.getNumCols(); i++)
-						out.print("<th>" + result.getColTitle(i) + "</th>");
-					out.println("</tr>");
-		
-					for (int row=0; row<result.getNumRows(); row++) {
-						out.print("<tr>");
-						for (int col=0; col<result.getNumCols(); col++) {
-							out.print("<td align='");
-							switch (result.getColJustify(col)) {
-								case CENTER_JUSTIFY:
-									out.print("center");
-									break;
-								case RIGHT_JUSTIFY:
-									out.print("right");
-									break;
-								case LEFT_JUSTIFY:
-								default:
-									out.print("center");
-									break;
-							}
-							out.print("'>" + result.getVal(row,col) + "</td>");
-						}
-						out.println("</tr>");
-					}
-					out.println("</table>");
+					out.print("<td align='left'>" + txn.getSource() + "</td>");
+					out.print("<td align='center'>" + txn.getDescription() + "</td>");
+					out.print("<td align='center'>" + txn.getDate() + "</td>");
+					out.print("<td align='right'>" + txn.getAmount().toString() + "</td>");
+					out.println("</tr>");	
 				}
+				out.println("</table>");
 			
-				BigDecimal end_bal = qm.GetBalanceAtDate( acct, endCal );
+				BigDecimal end_bal = ColeAccounting.GetBalanceAtDate( qm, acct, endCal );
 				out.println("<p><b>End Date: " + end + ", Balance: $" + end_bal.toString() + "</b></p>");
 			}
 		}

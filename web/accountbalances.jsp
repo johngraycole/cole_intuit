@@ -1,9 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
 <%@ page import="com.intuit.platform.client.PlatformSessionContext, 
 				com.intuit.utils.WebUtils,
+				com.intuit.utils.ColeUtils,
 				com.intuit.query.QueryManager, 
-				com.intuit.result.AnalysisResult,
-				com.intuit.result.AnalysisResult.ColumnJustify,
+				com.intuit.data.GLAccount,
+				com.intuit.cole.ColeAccounting,
+				java.util.List,
 				java.util.Calendar,
 				java.text.SimpleDateFormat" %>
 
@@ -55,6 +57,8 @@ End Date: <input type="text" name="EndDate" value="mm-dd-yy">
 
 				if (beginCal.after(endCal))
 					throw new Exception("Begin Date must come before End Date");
+				if (ColeUtils.CoversFYStart(beginCal, endCal, webutils))
+					throw new Exception("Dates cannot span Fiscal Year start");
 			} catch (Exception ex) {
 				out.print("<p><b>ERROR: "+ex.getMessage()+"</b></p>");
 				good = false;
@@ -62,44 +66,26 @@ End Date: <input type="text" name="EndDate" value="mm-dd-yy">
 
 			if (good) {
 				// make query through Java code
-				AnalysisResult result = qm.AccountBalances(beginCal, endCal);
+				List<GLAccount> gl_accts = ColeAccounting.AccountBalances(qm, beginCal, endCal);
 
-				String errmsg = result.getErrorMsg();
-				if (errmsg != null && errmsg.length() > 0) {
-					out.println("<p><b>ERROR: " + errmsg + "</b></p>");
-				} else {
-					// now ready to display the result
-					out.print("<table>");
-					for (int i=0; i<result.getNumCols(); i++)
-						out.print("<col width='" + result.getColWidth(i) + "'>");
-					out.println();
+				// now ready to display the result
+				out.print("<table>");
+				out.print("<col width='50'><col width='350'>");
+				out.println("<col width='150'><col width='150'><col width='150'><col width='150'>");
+				out.print("<tr><th>Acct#</th><th>Name</th>");
+				out.println("<th>Begin Bal</th><th>Positives</th><th>Negatives</th><th>End Bal</th></tr>");
+	
+				for (GLAccount gl_acct : gl_accts) {
 					out.print("<tr>");
-					for (int i=0; i<result.getNumCols(); i++)
-						out.print("<th>" + result.getColTitle(i) + "</th>");
-					out.println("</tr>");
-		
-					for (int row=0; row<result.getNumRows(); row++) {
-						out.print("<tr>");
-						for (int col=0; col<result.getNumCols(); col++) {
-							out.print("<td align='");
-							switch (result.getColJustify(col)) {
-								case CENTER_JUSTIFY:
-									out.print("center");
-									break;
-								case RIGHT_JUSTIFY:
-									out.print("right");
-									break;
-								case LEFT_JUSTIFY:
-								default:
-									out.print("center");
-									break;
-							}
-							out.print("'>" + result.getVal(row,col) + "</td>");
-						}
-						out.println("</tr>");
-					}
-					out.println("</table>");
+					out.print("<td align='left'>" + gl_acct.getAcctNum() + "</td>");
+					out.print("<td align='center'>" + gl_acct.getName() + "</td>");
+					out.print("<td align='right'>" + gl_acct.getBeginBalance().toString() + "</td>");
+					out.print("<td align='right'>" + gl_acct.getPositives().toString() + "</td>");
+					out.print("<td align='right'>" + gl_acct.getNegatives().toString() + "</td>");
+					out.print("<td align='right'>" + gl_acct.getEndBalance().toString() + "</td>");
+					out.println("</tr>");	
 				}
+				out.println("</table>");
 			}
 		}
 	} catch (Exception e) {		
