@@ -38,10 +38,10 @@
 			PlatformSessionContext context = webutils.getPlatformContext(accesstoken,accessstokensecret,realmID,dataSource);
 			QueryManager qm = new QueryManager(context);
 			try {
-				QBAccount acct = qm.GetAccount(acctnum);
-				if (acct == null)
-					throw new Exception("Acct# "+acctnum+" not found");
-				ColeAccounting.ScratchSpace(qm, acct);
+				//QBAccount acct = qm.GetAccount(acctnum);
+				//if (acct == null)
+				//	throw new Exception("Acct# "+acctnum+" not found");
+				ColeAccounting.ScratchSpace(qm);
 				out.println("<p>Were you watching?</p>");
 			} catch (Exception ex) {
 				out.print("<p><b>ERROR: "+ex.getMessage()+"</b></p>");

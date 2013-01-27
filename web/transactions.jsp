@@ -73,6 +73,8 @@
 			} 
 		
 			if (good) {
+				out.println("<p><b>Gray broke this (for now)</b></p>");
+				/*
 				out.println("<p><b>Account: " + acctnum + " ("+acct.getName()+")</b></p>");
 				
 				BigDecimal beg_bal = ColeAccounting.GetBalanceAtDate( qm, acct, beginCal );
@@ -97,6 +99,7 @@
 			
 				BigDecimal end_bal = ColeAccounting.GetBalanceAtDate( qm, acct, endCal );
 				out.println("<p><b>End Date: " + end + ", Balance: $" + end_bal.toString() + "</b></p>");
+				*/
 			}
 		}
 	} catch (Exception e) {		

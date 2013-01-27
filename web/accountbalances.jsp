@@ -65,6 +65,9 @@ End Date: <input type="text" name="EndDate" value="mm-dd-yy">
 			}
 
 			if (good) {
+				out.println("<p><b>Gray broke this (for now)</b></p>");
+
+				/*
 				// make query through Java code
 				List<GLAccount> gl_accts = ColeAccounting.AccountBalances(qm, beginCal, endCal);
 
@@ -86,6 +89,7 @@ End Date: <input type="text" name="EndDate" value="mm-dd-yy">
 					out.println("</tr>");	
 				}
 				out.println("</table>");
+				*/
 			}
 		}
 	} catch (Exception e) {		

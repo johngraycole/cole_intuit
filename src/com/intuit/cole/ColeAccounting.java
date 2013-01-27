@@ -1,15 +1,7 @@
 package com.intuit.cole;
 
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-
 import com.intuit.query.QueryManager;
-import com.intuit.data.GLTrans;
-import com.intuit.data.GLAccount;
 import com.intuit.ds.qb.*;
 
 /*
@@ -29,7 +21,19 @@ import com.intuit.query.QBBillService;
 
 public class ColeAccounting {
 
-	public static BigDecimal GetBalanceAtDate(QueryManager qm, QBAccount acct, Calendar reqDate) {
+	public static void ScratchSpace(QueryManager qm) throws Exception {
+		
+		List<CompanyMetaData> companies = qm.QueryCompanies();
+		
+		for (CompanyMetaData company : companies) {
+			System.out.println("CMD -> " + company.getQBNRegisteredCompanyName() );
+			System.out.println("\tFY Start -> " + company.getFiscalYearStart() );
+		}
+	}
+
+	/*
+	 * 
+	 public static BigDecimal GetBalanceAtDate(QueryManager qm, QBAccount acct, Calendar reqDate) {
 		Calendar now = Calendar.getInstance();
 		now.add(Calendar.HOUR_OF_DAY, -now.get(Calendar.HOUR_OF_DAY));
 		now.add(Calendar.MINUTE, -now.get(Calendar.MINUTE));
@@ -41,26 +45,7 @@ public class ColeAccounting {
 
 		return BigDecimal.ZERO;
 	}
-
 	
-	public static List<GLTrans> GetAllTransactions(QueryManager qm, QBAccount acct, Calendar begin, Calendar end) {
-		List<GLTrans> txns = new ArrayList<GLTrans>();
-		
-		return txns;
-	}
-	
-	public static List<GLAccount> AccountBalances(QueryManager qm, Calendar begDate, Calendar endDate) {
-		List<GLAccount> accts = new ArrayList<GLAccount>();
-		
-		return accts;
-	}
-	
-	public static void ScratchSpace(QueryManager qm, QBAccount acct) throws Exception {
-		
-		System.out.println("Gray broke this (for now)");
-	}
-
-	/*
 	public void ScratchSpace(QBAccount acct) throws Exception {
 		System.out.println(">>>");
 		System.out.println(">>>");
