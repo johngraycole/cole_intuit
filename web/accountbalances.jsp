@@ -57,8 +57,8 @@ End Date: <input type="text" name="EndDate" value="mm-dd-yy">
 
 				if (beginCal.after(endCal))
 					throw new Exception("Begin Date must come before End Date");
-				if (ColeUtils.CoversFYStart(beginCal, endCal, webutils))
-					throw new Exception("Dates cannot span Fiscal Year start");
+				//if (ColeUtils.CoversFYStart(beginCal, endCal, webutils))
+				//	throw new Exception("Dates cannot span Fiscal Year start");
 			} catch (Exception ex) {
 				out.print("<p><b>ERROR: "+ex.getMessage()+"</b></p>");
 				good = false;

@@ -1,16 +1,19 @@
-package com.intuit.data;
+package com.intuit.gl.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import com.intuit.ds.qb.QBAccount;
+import com.intuit.ds.qb.QBIdType;
 
 
 public class GLAccount implements Serializable {
 	private static final long serialVersionUID = 9834759328710111L;
 	private String _acctNum, _name;
 	private BigDecimal _currBal;
+	private QBIdType _id;
+
 	private List<GLTrans> _transactions;
 
 	public GLAccount() {
@@ -30,6 +33,15 @@ public class GLAccount implements Serializable {
 		_acctNum = qb_acct.getAcctNum();
 		_name = qb_acct.getName();
 		_currBal = qb_acct.getCurrentBalance();
+		_id = qb_acct.getId();
+	}
+	
+	public QBIdType getID() {
+		return _id;
+	}
+
+	public void setID(QBIdType id) {
+		this._id = id;
 	}
 	
 	public void setAcctNum(String num) {
@@ -63,7 +75,10 @@ public class GLAccount implements Serializable {
 	public String toString() {
 		String str = "GLAccount: ";
 		str += _acctNum + " - " + _name + "\n";
-		str += "Current Balance: $"+_currBal.toString() + "\n";
+		if (_currBal != null)
+			str += "Current Balance: $"+_currBal.toString() + "\n";
+		else
+			str += "Current Balance: null\n";
 		str += "Transactions:\n";
 		for (GLTrans txn : _transactions)
 			str += "\t" + txn.toString() + "\n";

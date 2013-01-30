@@ -2,7 +2,7 @@ package com.intuit.query;
 
 import java.util.*;
 import com.intuit.ds.qb.*;
-import com.intuit.data.*;
+import com.intuit.gl.data.*;
 import com.intuit.platform.client.PlatformSessionContext;
 
 public class QueryManager {
@@ -99,7 +99,7 @@ public class QueryManager {
 				txns.add(txn);
 			}
 		}
-
+/*
 		// now look at bill payments
 		QBBillPaymentService bpdb = QBServiceFactory.getService(_context, QBBillPaymentService.class);
 		List<QBBillPayment> payments = new ArrayList<QBBillPayment>();
@@ -128,7 +128,7 @@ public class QueryManager {
 				txns.add(txn);
 			}
 		}
-		
+*/	
 		// TODO: add any more DB queries here...
 		
 		return txns;

@@ -65,18 +65,6 @@ public class WebUtils {
 		}
 		return value;
 	}
-	
-	public Calendar getFiscalYearStart() {
-		try {
-			String fy_start = getProps("fiscal_year_start");
-			Calendar cal = Calendar.getInstance();
-			SimpleDateFormat sdf = new SimpleDateFormat("MM-dd");
-			cal.setTime(sdf.parse(fy_start));
-			return cal;
-		} catch (Exception ex) {
-			return null;
-		}
-	}
 
 	public String getappToken() {
 		return getProps("appToken");

@@ -4,10 +4,11 @@ import java.util.Calendar;
 
 public class ColeUtils {
 	
-	public static boolean CoversFYStart(Calendar one, Calendar two, WebUtils util) throws Exception {
-		Calendar fy_start = util.getFiscalYearStart();
+	public static boolean CoversFYStart(Calendar one, Calendar two, Calendar fy_start) throws Exception {
+		if (one == null || two == null)
+			throw new Exception("CoversFYStart: Null dates passed in");
 		if (fy_start == null)
-			throw new Exception("No FY Start Defined, please add fiscal_year_start to properties file");
+			throw new Exception("CoversFYStart: Null FY Start");
 
 		int fy_month = fy_start.get(Calendar.MONTH);
 		int fy_day = fy_start.get(Calendar.DAY_OF_MONTH);

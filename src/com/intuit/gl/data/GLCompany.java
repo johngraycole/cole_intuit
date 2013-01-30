@@ -1,4 +1,4 @@
-package com.intuit.data;
+package com.intuit.gl.data;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -10,15 +10,17 @@ import com.intuit.ds.qb.CompanyMetaData;
 public class GLCompany implements Serializable {
 	private static final long serialVersionUID = 897593427091201L;
 	private String _qbnName;
-	private Calendar _fyStart;
+	private Calendar _fyStart, _lastUpdated;
 	private List<GLAccount> _accounts;
 	
 	public GLCompany() {
 		_accounts = new ArrayList<GLAccount>();
+		_lastUpdated = Calendar.getInstance();
+		_fyStart = null;
 	}
 	
 	public GLCompany(CompanyMetaData mdata) {
-		_accounts = new ArrayList<GLAccount>();
+		this();
 		setMetadata(mdata);
 	}
 	
@@ -34,6 +36,10 @@ public class GLCompany implements Serializable {
 			} catch (Exception ex) {
 			}
 		}
+	}
+
+	public Calendar getLastUpdated() {
+		return _lastUpdated;
 	}
 
 	public String getQbnName() {
@@ -52,7 +58,7 @@ public class GLCompany implements Serializable {
 		_fyStart = fyStart;
 	}
 
-	public List<GLAccount> get_accounts() {
+	public List<GLAccount> getAccounts() {
 		return _accounts;
 	}
 
@@ -60,7 +66,7 @@ public class GLCompany implements Serializable {
 	public String toString() {
 		SimpleDateFormat sdf = new SimpleDateFormat("MM-dd");
 		String str = "GLCompany: " + _qbnName + "\n";
-		str += "FY Start: "+ sdf.format(_fyStart) + "\n";
+		str += "FY Start: "+ sdf.format(_fyStart.getTime()) + "\n";
 		str += "Accounts:\n";
 		for (GLAccount acct : _accounts)
 			str += acct.toString() + "\n";

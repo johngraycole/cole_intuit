@@ -1,4 +1,4 @@
-package com.intuit.data;
+package com.intuit.gl.data;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -60,10 +60,18 @@ public class GLTrans implements Serializable {
 	@Override
 	public String toString() {
 		String str = "GLTrans: ";
-		str += "<" + _description + "> ";
-		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy");
-		str += sdf.format(_date.getTime());
-		str += " -> $" + _amount.toString();
+		str += "<" + _description + "> Date: ";
+		if (_date != null) {
+			SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy");
+			str += sdf.format(_date.getTime());
+		} else {
+			str += "null";
+		}
+	
+		if (_amount != null)
+			str += " -> $" + _amount.toString();
+		else
+			str += " -> null";
 		str += " from " + _source;
 		return str;
 	}
