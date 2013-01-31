@@ -12,6 +12,7 @@
 	WebUtils webutils = new WebUtils(); 
 	String app_url=webutils.getAppUrl(); 
 	String appcenter_url=webutils.getAppcenterUrl();
+	String gl_file = webutils.getGLSerializedFile();
 %>
 <script type="text/javascript" src="<%= appcenter_url %>/Content/IA/intuit.ipp.anywhere.js"></script>
 
@@ -36,7 +37,9 @@
 <%
 		GLCompany comp = null;
 		try {
-			comp = GatherGL.fromDisk();
+			gl_file = getServletContext().getRealPath(gl_file);
+			System.out.println("GL Serialized File: "+gl_file);
+			comp = GatherGL.fromDisk(gl_file);
 			SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
 			String last_gathered = sdf.format(comp.getLastUpdated().getTime());
 			out.println("<p>Last DB Snapshot Done on: <b>" + last_gathered + "</b></p>");

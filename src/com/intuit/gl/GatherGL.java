@@ -17,14 +17,13 @@ import com.intuit.gl.data.GLTrans;
 import com.intuit.query.QueryManager;
 
 public class GatherGL {
-	private static final String _FILENAME_ = "gl_company.ser";
 	
-	public static GLCompany fromDisk() throws Exception {
-		File f = new File(_FILENAME_);
+	public static GLCompany fromDisk(String filename) throws Exception {
+		File f = new File(filename);
 		if (!f.exists())
 			throw new Exception("Serialized General Ledger not found");
 		
-		FileInputStream fileIn = new FileInputStream(_FILENAME_);
+		FileInputStream fileIn = new FileInputStream(filename);
 		ObjectInputStream in = new ObjectInputStream(fileIn);
         GLCompany comp = (GLCompany)in.readObject();
         in.close();
@@ -62,20 +61,23 @@ public class GatherGL {
 		
 		// ok, finally we need to pull out the transactions
 		List<GLTrans> txns = qm.QueryTransactions();
+		int numfound=0;
 		for (GLTrans txn : txns) {
 			for (GLAccount acct : gl_accts) {
 				if (txn.getAccountID()!=null && txn.getAccountID().equals(acct.getID())) {
 					acct.getTransactions().add(txn);
+					numfound++;
 					break;
 				}
 			}
 		}
+		System.out.println("Of "+ txns.size() + " GLTrans, found accounts for "+numfound);
 		
 		return comp;
 	}
 	
-	public static void pushToDisk(GLCompany comp) throws Exception {
-		FileOutputStream fileOut = new FileOutputStream(_FILENAME_);
+	public static void pushToDisk(GLCompany comp, String filename) throws Exception {
+		FileOutputStream fileOut = new FileOutputStream(filename);
 		ObjectOutputStream out = new ObjectOutputStream(fileOut);
 		out.writeObject(comp);
 		out.close();

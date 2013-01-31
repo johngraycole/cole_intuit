@@ -66,6 +66,10 @@ public class WebUtils {
 		return value;
 	}
 
+	public String getGLSerializedFile() {
+		return getProps("gl_serialized_file");
+	}
+
 	public String getappToken() {
 		return getProps("appToken");
 	}
