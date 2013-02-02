@@ -47,6 +47,8 @@ public class GatherGL {
 				Calendar fy = Calendar.getInstance();
 				fy.setTime(sdf.parse("01-01"));
 				comp.setFyStart(fy);
+				
+				System.out.println("Overwriting FY Start as: "+sdf.format(comp.getFyStart().getTime()));
 			}
 			
 			// TODO: fill this with any other companies
@@ -56,8 +58,13 @@ public class GatherGL {
 		// next, let's fill in the accounts
 		List<QBAccount> qb_accts = qm.QueryAccounts();
 		List<GLAccount> gl_accts = comp.getAccounts();
-		for (QBAccount qb_acct : qb_accts)
+		for (QBAccount qb_acct : qb_accts) {
+			if (qb_acct.getAcctNum() == null) {
+				System.out.println("Ignoring null acct num: "+qb_acct.getName());
+				continue;
+			}
 			gl_accts.add(new GLAccount(qb_acct));
+		}
 		
 		// ok, finally we need to pull out the transactions
 		List<GLTrans> txns = qm.QueryTransactions();

@@ -2,10 +2,11 @@
 <%@ page import="com.intuit.platform.client.PlatformSessionContext, 
 				com.intuit.utils.WebUtils,
 				com.intuit.utils.ColeUtils,
-				com.intuit.query.QueryManager, 
-				com.intuit.data.GLTrans,
-				com.intuit.cole.ColeAccounting,
-				com.intuit.ds.qb.QBAccount,
+				com.intuit.gl.data.GLTrans,
+				com.intuit.gl.data.GLCompany,
+				com.intuit.gl.data.GLAccount,
+				com.intuit.gl.ProcessGL,
+				com.intuit.gl.GatherGL,
 				java.math.BigDecimal,
 				java.util.Calendar,
 				java.util.List,
@@ -17,6 +18,10 @@
 	WebUtils webutils = new WebUtils(); 
 	String app_url=webutils.getAppUrl(); 
 	String appcenter_url=webutils.getAppcenterUrl();
+	String gl_file = webutils.getGLSerializedFile();
+	String acctnum = request.getParameter("AcctNum");
+	String beg = request.getParameter("BegDate");
+	String end = request.getParameter("EndDate");
 %>
 
 <script src="<%= appcenter_url %>/Content/IA/intuit.ipp.anywhere.js" type="text/javascript"></script>
@@ -26,45 +31,48 @@
 <body>
 <h3>Cole Intuit Accounting Suite: Account Transactions</h3>
 <p><a href="index.jsp">Return to Main Page</a></p>
+<%
+if (beg!=null && end!=null) {
+	out.print("<p><a href=\"accountbalances.jsp?");
+	out.print("BegDate="+beg);
+	out.print("&EndDate="+end);
+	out.println("\">Return to Account Balances</a></p>");
+}		
+%>
+
+
 <form action="transactions.jsp">
-	Account Number: <input type="text" name="AcctNum" value=""><br>
-	Begin Date: <input type="text" name="BegDate" value="mm-dd-yy">
-	End Date: <input type="text" name="EndDate" value="mm-dd-yy">
+	Account Number: <input type="text" name="AcctNum" value="<%= (acctnum==null ? "" : acctnum) %>"><br>
+	Begin Date: <input type="text" name="BegDate" value="<%= (beg==null ? "mm-dd-yy" : beg) %>">
+	End Date: <input type="text" name="EndDate" value="<%= (end==null ? "mm-dd-yy" : end) %>">
 	<input type="submit" value="Submit">
 </form>
 <ul>
 
 <% 
 	try {
-		String acctnum = request.getParameter("AcctNum");
-		String beg = request.getParameter("BegDate");
-		String end = request.getParameter("EndDate");
-		if (acctnum != null && beg != null && end != null) {
+		gl_file = getServletContext().getRealPath(gl_file);
+		GLCompany comp = GatherGL.fromDisk(gl_file);
 
-			String accesstoken = (String)session.getAttribute("accessToken");
-			String accessstokensecret = (String)session.getAttribute("accessTokenSecret");
-			String realmID = (String)session.getAttribute("realmId");
-			String dataSource = (String)session.getAttribute("dataSource");
-			PlatformSessionContext context = webutils.getPlatformContext(accesstoken,accessstokensecret,realmID,dataSource);
+		if (acctnum != null && beg != null && end != null) {
 			boolean good = true;
-			QueryManager qm = new QueryManager(context);
-			QBAccount acct = null;
+			SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yy");
 			Calendar beginCal = Calendar.getInstance();
 			Calendar endCal = Calendar.getInstance();
+			GLAccount acct = null;
 			try {
 				// check valid dates
-				SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yy");
 				beginCal.setTime(sdf.parse(beg));
 				endCal.setTime(sdf.parse(end));
 				if (beginCal.after(endCal))
 					throw new Exception("Begin Date must come before End Date");
-				if (ColeUtils.CoversFYStart(beginCal, endCal, webutils))
+				if (ColeUtils.CoversFYStart(beginCal, endCal, comp.getFyStart()))
 					throw new Exception("Dates cannot span Fiscal Year start");
 
 				// check valid account number
 				if (acctnum.length() == 0)
 					throw new Exception("Please enter Acct#");
-				acct = qm.GetAccount(acctnum);
+				acct = ProcessGL.FindAccount(comp, acctnum);
 				if (acct == null)
 					throw new Exception("Acct# "+acctnum+" not found");
 			} catch (Exception ex) {
@@ -73,14 +81,12 @@
 			} 
 		
 			if (good) {
-				out.println("<p><b>Gray broke this (for now)</b></p>");
-				/*
 				out.println("<p><b>Account: " + acctnum + " ("+acct.getName()+")</b></p>");
 				
-				BigDecimal beg_bal = ColeAccounting.GetBalanceAtDate( qm, acct, beginCal );
-				out.println("<p><b>Begin Date: " + beg + ", Balance: $" + beg_bal.toString() + "</b></p>");
+				BigDecimal bal = ProcessGL.GetBalanceAtDate( acct, beginCal );
+				out.println("<p><b>Begin Date: " + beg + ", Balance: $" + bal.toString() + "</b></p>");
 				
-				List<GLTrans> txns = ColeAccounting.GetAllTransactions(qm, acct, beginCal, endCal);
+				List<GLTrans> txns = ProcessGL.GetAllTransactions(acct, beginCal, endCal);
 									
 				// now ready to display the result
 				out.print("<table>");
@@ -91,19 +97,23 @@
 					out.print("<tr>");
 					out.print("<td align='left'>" + txn.getSource() + "</td>");
 					out.print("<td align='center'>" + txn.getDescription() + "</td>");
-					out.print("<td align='center'>" + txn.getDate() + "</td>");
-					out.print("<td align='right'>" + txn.getAmount().toString() + "</td>");
+					out.print("<td align='center'>" + sdf.format(txn.getDate().getTime()) + "</td>");
+					if (txn.getAmount() != null) {
+						out.print("<td align='right'>" + txn.getAmount().toString() + "</td>");
+						bal = bal.add(txn.getAmount());
+					} else {
+						out.print("<td align='right'>null</td>");
+					}
+						
 					out.println("</tr>");	
 				}
 				out.println("</table>");
 			
-				BigDecimal end_bal = ColeAccounting.GetBalanceAtDate( qm, acct, endCal );
-				out.println("<p><b>End Date: " + end + ", Balance: $" + end_bal.toString() + "</b></p>");
-				*/
+				out.println("<p><b>End Date: " + end + ", Balance: $" + bal.toString() + "</b></p>");
 			}
 		}
 	} catch (Exception e) {		
-		out.println("<p>Error: Exception thrown.</p>");
+	out.println("<p>Error: Exception thrown: <b>"+e.getMessage()+"</b></p>");
 		System.out.println("Exception thrown: " + e.getMessage());
 	}
  %>

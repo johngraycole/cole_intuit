@@ -39,15 +39,19 @@
 		System.out.println("Wrote GL Serialized File: "+gl_file);
 
 		out.println("<p>General Ledger DB queried successfully:</p>");
-		out.println("<p>Company Name: "+comp.getQbnName()+"</p>");
-		out.println("<p>Accounts</p>");
-		out.println("<ul>");
+		out.println("<p>Company Name: <b>"+comp.getQbnName()+"</b></p>");
+
+		out.print("<table>");
+		out.println("<col width='50'><col width='350'><col width='150'>");
+		out.print("<tr><th>Acct#</th><th>Name</th><th>Num GL Trans</th></tr>");
 		for (GLAccount acct : comp.getAccounts()) {
-			out.print("<li>"+acct.getAcctNum() + " " + acct.getName());
-			out.println(" -> "+acct.getTransactions().size()+" transactions</li>");
+			out.print("<tr>");
+			out.print("<td align='left'>" + acct.getAcctNum() + "</td>");
+			out.print("<td align='center'>" + acct.getName() + "</td>");
+			out.print("<td align='right'>" + acct.getTransactions().size() + "</td>");
+			out.println("</tr>");	
 		}
-		out.println("</ul>"); 
-		
+		out.println("</table>");
 	} catch (Exception e) {		
 		out.println("<p>Error: Servlet Exception thrown.</p>");
 		System.out.println("Servlet Exception thrown: " + e.getMessage());

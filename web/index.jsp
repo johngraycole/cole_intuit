@@ -40,11 +40,11 @@
 			gl_file = getServletContext().getRealPath(gl_file);
 			System.out.println("GL Serialized File: "+gl_file);
 			comp = GatherGL.fromDisk(gl_file);
-			SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
+			SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
 			String last_gathered = sdf.format(comp.getLastUpdated().getTime());
 			out.println("<p>Last DB Snapshot Done on: <b>" + last_gathered + "</b></p>");
 		} catch (Exception ex) {
-		out.println("<p>Unable to Gather Last DB Snapshot: <b>" + ex.getMessage() + "</b></p>");
+			out.println("<p>Unable to Gather Last DB Snapshot: <b>" + ex.getMessage() + "</b></p>");
 		}
 %>
 		<ul>

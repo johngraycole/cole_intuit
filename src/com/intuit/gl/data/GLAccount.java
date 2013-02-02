@@ -21,7 +21,7 @@ public class GLAccount implements Serializable {
 	}
 	
 	public GLAccount(QBAccount acct) {
-		_transactions = new ArrayList<GLTrans>();
+		this();
 		setAccountInfo(acct);
 	}
 	
