@@ -37,9 +37,15 @@ public class GatherGL {
 		
 		// first, get company stats
 		List<CompanyMetaData> comp_mdata = qm.QueryCompanies();
+		/*
 		if (comp_mdata.size() != 1)
 			throw new Exception("fromDB: QueryCompanies returned " + comp_mdata.size() + " companies ??");
-		comp.setMetadata(comp_mdata.get(0));
+		*/
+		if (comp_mdata.size() > 1)
+		    comp.setMetadata(comp_mdata.get(1));
+		else
+		    comp.setMetadata(comp_mdata.get(0));
+
 		if (comp.getFyStart() == null) {
 			
 			if (comp.getQbnName().indexOf("LGL Administrative Services") >= 0) {
@@ -67,7 +73,7 @@ public class GatherGL {
 		}
 		
 		// ok, finally we need to pull out the transactions
-		List<GLTrans> txns = qm.QueryTransactions();
+		List<GLTrans> txns = qm.QueryTransactions(comp);
 		int numfound=0;
 		for (GLTrans txn : txns) {
 			for (GLAccount acct : gl_accts) {

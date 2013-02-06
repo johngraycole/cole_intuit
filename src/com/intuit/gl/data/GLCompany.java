@@ -6,10 +6,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import com.intuit.ds.qb.CompanyMetaData;
+import com.intuit.ds.qb.QBIdType;
 
 public class GLCompany implements Serializable {
 	private static final long serialVersionUID = 897593427091201L;
-	private String _qbnName;
+    private String _qbnName, _defAPacctNum, _defARacctNum, _defBankAcctNum;
 	private Calendar _fyStart, _lastUpdated;
 	private List<GLAccount> _accounts;
 	
@@ -25,6 +26,10 @@ public class GLCompany implements Serializable {
 	}
 	
 	public void setMetadata(CompanyMetaData mdata) {
+	    // hard wired values until preference file is created
+	    _defAPacctNum = "20000";
+	    _defARacctNum = "11000";
+	    _defBankAcctNum = "10600";
 		_qbnName = mdata.getQBNRegisteredCompanyName();
 		if (mdata.getFiscalYearStart() != null) {
 			try {
@@ -50,6 +55,30 @@ public class GLCompany implements Serializable {
 		_qbnName = qbnName;
 	}
 
+	public String getDefAPacctNum() {
+		return _defAPacctNum;
+	}
+
+	public void setDefAPacctNum(String defAPacctNum) {
+		_defAPacctNum = defAPacctNum;
+	}
+
+	public String getDefARacctNum() {
+		return _defARacctNum;
+	}
+
+	public void setDefARacctNum(String defARacctNum) {
+		_defARacctNum = defARacctNum;
+	}
+
+	public String getDefBankAcctNum() {
+		return _defBankAcctNum;
+	}
+
+	public void setDefBankAcctNum(String defBankAcctNum) {
+		_defBankAcctNum = defBankAcctNum;
+	}
+
 	public Calendar getFyStart() {
 		return _fyStart;
 	}
@@ -61,6 +90,16 @@ public class GLCompany implements Serializable {
 	public List<GLAccount> getAccounts() {
 		return _accounts;
 	}
+
+    public QBIdType getQBAcctId(String acct) {
+	for (GLAccount glacct : _accounts)  {
+	    if (acct.equals(glacct.getAcctNum())) {
+		//System.out.println("getQBAcctId("+acct+") -> " + glacct.getName());
+		return glacct.getID();
+	    }
+	}
+	return null;
+    }
 
 	@Override
 	public String toString() {
