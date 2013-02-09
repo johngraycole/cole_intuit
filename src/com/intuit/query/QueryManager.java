@@ -1,9 +1,11 @@
 package com.intuit.query;
 
+import java.math.BigDecimal;
 import java.util.*;
 import com.intuit.ds.qb.*;
 import com.intuit.gl.data.*;
 import com.intuit.platform.client.PlatformSessionContext;
+import com.intuit.sb.cdm.IdDomainEnum;
 
 public class QueryManager {
 	private PlatformSessionContext _context;
@@ -67,7 +69,7 @@ public class QueryManager {
 		return null;
 	}
 	
-	public List<GLTrans> QueryTransactions() throws Exception {
+	public List<GLTrans> QueryTransactions(GLCompany comp) throws Exception {
 		List<GLTrans> txns = new ArrayList<GLTrans>();
 		int page, maxpages = 100;
 
@@ -89,6 +91,14 @@ public class QueryManager {
 		
 		for (QBBill bill : bills) {
 			BillHeader head = bill.getHeader();
+			GLTrans htxn = new GLTrans();
+			// get the string value of the account number -- turn into qb _id
+			htxn.setAccountID(comp.getQBAcctId(comp.getDefAPacctNum()));
+			htxn.setAmount(head.getTotalAmt().negate());
+			htxn.setDate(head.getTxnDate());
+			htxn.setDescription(head.getVendorName());
+			htxn.setSource("Bill");
+			txns.add(htxn);
 			for (BillLine line : bill.getLine()) {
 				GLTrans txn = new GLTrans();
 				txn.setAccountID(line.getAccountId());
@@ -99,7 +109,7 @@ public class QueryManager {
 				txns.add(txn);
 			}
 		}
-/*
+
 		// now look at bill payments
 		QBBillPaymentService bpdb = QBServiceFactory.getService(_context, QBBillPaymentService.class);
 		List<QBBillPayment> payments = new ArrayList<QBBillPayment>();
@@ -118,9 +128,22 @@ public class QueryManager {
 		
 		for (QBBillPayment payment : payments) {
 			BillPaymentHeader head = payment.getHeader();
+			GLTrans htxn = new GLTrans();
+			// get the string value of the account number -- turn into qb _id
+			htxn.setAccountID(comp.getQBAcctId(comp.getDefBankAcctNum()));
+			BigDecimal amt = new BigDecimal(0);
+			if (head.getTotalAmt() != null)
+			    amt = head.getTotalAmt().negate();
+			
+			htxn.setAmount(amt);
+			htxn.setDate(head.getTxnDate());
+			htxn.setDescription("Accounts Payable Payment");
+			htxn.setSource("Bill Payment");
+			txns.add(htxn);
+			
 			for (BillPaymentLine line : payment.getLine()) {
 				GLTrans txn = new GLTrans();
-				txn.setAccountID(null);
+				txn.setAccountID(comp.getQBAcctId(comp.getDefAPacctNum()));
 				txn.setAmount(line.getAmount());
 				txn.setDate(head.getTxnDate());
 				txn.setDescription(line.getDesc());
@@ -128,7 +151,7 @@ public class QueryManager {
 				txns.add(txn);
 			}
 		}
-*/	
+	
 		// TODO: add any more DB queries here...
 		
 		return txns;
