@@ -96,5 +96,12 @@ public class GatherGL {
 		out.close();
 		fileOut.close();
 	}
+	
+	public static void deleteSnapshot(String filename) throws Exception {
+		File f = new File(filename);
+		if (!f.exists())
+			throw new Exception("Serialized General Ledger not found");
+		f.delete();
+	}
 
 }

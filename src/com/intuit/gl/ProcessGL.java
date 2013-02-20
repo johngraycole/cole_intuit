@@ -24,7 +24,7 @@ public class ProcessGL {
 	}
 
 	public static BigDecimal GetBalanceAtDate(GLAccount acct, Calendar begDate) {
-		SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yy");
+		//SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yy");
 		BigDecimal curr_bal = acct.getCurrentBalance();
 
 		//System.out.println("GetBalanceAtDate("+acct.getAcctNum()+","+sdf.format(begDate.getTime())+")");

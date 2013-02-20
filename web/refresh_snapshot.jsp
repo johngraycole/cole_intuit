@@ -21,7 +21,7 @@
 </head>
 <body>
 <h3>Cole Intuit Accounting Suite: Refresh DB Snapshot</h3>
-<p><a href="index.jsp">Return to Main Page</a></p>
+<p><a href="intuit_login.jsp">Go Back</a></p>
 <ul>
 
  <% 

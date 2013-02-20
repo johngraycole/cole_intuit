@@ -29,43 +29,30 @@
  	if(connectionStatus!=null && connectionStatus.equalsIgnoreCase("authorized"))
 	{ 
 %>
-		<p>To see the apps available to the user, select the Intuit "blue dot" menu.</p>
-		<p>The OAuth flow has been completed. Because the app now has an authorized access token, 
-		it can access QuickBooks data by making calls to Data Services.</p>
-		<p></p>
-
-<%
-		GLCompany comp = null;
-		try {
-			gl_file = getServletContext().getRealPath(gl_file);
-			System.out.println("GL Serialized File: "+gl_file);
-			comp = GatherGL.fromDisk(gl_file);
-			SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
-			String last_gathered = sdf.format(comp.getLastUpdated().getTime());
-			out.println("<p>Last DB Snapshot Done on: <b>" + last_gathered + "</b></p>");
-		} catch (Exception ex) {
-			out.println("<p>Unable to Gather Last DB Snapshot: <b>" + ex.getMessage() + "</b></p>");
-		}
-%>
-		<ul>
-			<li><a href="refresh_snapshot.jsp">Refresh DB Snapshot</a></li>
-			<li><a href="accounts.jsp">Display All QuickBooks Accounts from DB</a></li>
-			<li><a href="accountbalances.jsp">Query Account Balances from Snapshot</a></li>
-			<li><a href="transactions.jsp">Query Account Transactions from Snapshot</a></li>
-			<li><a href="scratch_space.jsp">Scratch Space (for testing only)</a></li>
-			<li><a href="disconnect.jsp">Disconnect from QuickBooks Intuit</a></li>
-		</ul> 
-
- 		<ipp:blueDot></ipp:blueDot>
+        <p><b>ERROR:</b> You currently have login access to Intuit</p> 
+		<p>Please return to <a href="intuit_login.jsp">Intuit Login page</a> and disconnect</p>
 <% 
 	} else {
-		session.setAttribute("flowType", "connect_button");
+    
+        GLCompany comp = null;
+        try {
+            gl_file = getServletContext().getRealPath(gl_file);
+            System.out.println("GL Serialized File: "+gl_file);
+            comp = GatherGL.fromDisk(gl_file);
+            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+            String last_gathered = sdf.format(comp.getLastUpdated().getTime());
+            out.println("<p>Last DB Snapshot Done on: <b>" + last_gathered + "</b></p>");
+        } catch (Exception ex) {
+            out.println("<p>Unable to Gather Last DB Snapshot: <b>" + ex.getMessage() + "</b></p>");
+        }
 %>
-		<p>To authorize this app to access your QuickBooks data, click the "Connect to QuickBooks" button.</p> 
-		<p>This will start the three-legged OAuth flow.</p>
-		<p><ipp:connectToIntuit></ipp:connectToIntuit></p>
+        <ul>
+            <li><a href="intuit_login.jsp">Intuit Login (refresh snapshot)</a></li>
+            <li><a href="accountbalances.jsp">Query Account Balances from Snapshot</a></li>
+            <li><a href="transactions.jsp">Query Account Transactions from Snapshot</a></li>
+        </ul> 
 <%
-	}
+    }
 %>
 </body>
 </html>

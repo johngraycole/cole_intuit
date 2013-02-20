@@ -7,7 +7,7 @@
 </head>
 <body>
 	<script type="text/javascript">
-		window.opener.location.href="/Cole_Intuit/index.jsp";
+		window.opener.location.href="/Cole_Intuit/intuit_login.jsp";
 		window.close();
 	</script>
 </body>
