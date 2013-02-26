@@ -5,7 +5,6 @@ import java.util.*;
 import com.intuit.ds.qb.*;
 import com.intuit.gl.data.*;
 import com.intuit.platform.client.PlatformSessionContext;
-import com.intuit.sb.cdm.IdDomainEnum;
 
 public class QueryManager {
 	private PlatformSessionContext _context;

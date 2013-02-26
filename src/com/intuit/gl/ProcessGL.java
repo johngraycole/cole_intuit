@@ -1,7 +1,6 @@
 package com.intuit.gl;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -62,7 +61,8 @@ public class ProcessGL {
 			
 		} else {
 			//BalanceSheetPath
-			Calendar now = Calendar.getInstance();
+			
+			//Calendar now = Calendar.getInstance();
 			//System.out.println("BalanceSheetPath: now = "+sdf.format(now.getTime()));
 			//System.out.println("BalanceSheetPath: curr_bal = "+curr_bal.toString());
 			

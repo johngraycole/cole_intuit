@@ -45,7 +45,7 @@ public class DisconnectServlet extends HttpServlet {
 		String realmID = (String) session.getAttribute("realmId");
 		String dataSource = (String) session.getAttribute("dataSource");
 		PlatformSessionContext context = null;
-		PrintWriter out = response.getWriter();
+		//PrintWriter out = response.getWriter();
 
 		try {
 			if (accesstoken != null && accessstokensecret != null

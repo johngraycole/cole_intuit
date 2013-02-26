@@ -14,11 +14,7 @@ package com.intuit.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Calendar;
 import java.util.Properties;
-import java.text.SimpleDateFormat;
-
-import com.intuit.ds.qb.qbo.QBOService;
 import com.intuit.platform.client.PlatformServiceType;
 import com.intuit.platform.client.PlatformSessionContext;
 import com.intuit.platform.client.security.OAuthCredentials;
