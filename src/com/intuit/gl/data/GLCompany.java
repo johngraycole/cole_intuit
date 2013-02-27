@@ -18,31 +18,12 @@ public class GLCompany implements Serializable {
 		_accounts = new ArrayList<GLAccount>();
 		_lastUpdated = Calendar.getInstance();
 		_fyStart = null;
-	}
-	
-	public GLCompany(CompanyMetaData mdata) {
-		this();
-		setMetadata(mdata);
-	}
-	
-	public void setMetadata(CompanyMetaData mdata) {
-	    // hard wired values until preference file is created
-	    _defAPacctNum = "20000";
-	    _defARacctNum = "11000";
-	    _defBankAcctNum = "10600";
-		_qbnName = mdata.getQBNRegisteredCompanyName();
-		if (mdata.getFiscalYearStart() != null) {
-			try {
-				SimpleDateFormat sdf = new SimpleDateFormat("MM-dd");
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(sdf.parse("01-01"));
-				cal.add(Calendar.MONTH, mdata.getFiscalYearStart());
-				_fyStart = cal;
-			} catch (Exception ex) {
-			}
-		}
-	}
 
+		_defAPacctNum = null; //"20000";
+	    _defARacctNum = null; //"11000";
+	    _defBankAcctNum = null; //"10600";
+	}
+	
 	public Calendar getLastUpdated() {
 		return _lastUpdated;
 	}
@@ -81,6 +62,11 @@ public class GLCompany implements Serializable {
 
 	public Calendar getFyStart() {
 		return _fyStart;
+	}
+	
+	public String getFyStartString(String format) {
+		SimpleDateFormat sdf = new SimpleDateFormat(format);
+		return sdf.format(_fyStart.getTime());
 	}
 
 	public void setFyStart(Calendar fyStart) {

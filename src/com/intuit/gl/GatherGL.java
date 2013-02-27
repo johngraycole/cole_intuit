@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
@@ -32,34 +31,29 @@ public class GatherGL {
         return comp;
 	}
 	
-	public static GLCompany fromDB(QueryManager qm) throws Exception {
+	public static GLCompany fromDB(QueryManager qm, String qbn, 
+			String ap_acct, String ar_acct, String bank_acct, 
+			Calendar fyStart) throws Exception {
+		
+		boolean found;
 		GLCompany comp = new GLCompany();
 		
-		// first, get company stats
+		// first, get company name
 		List<CompanyMetaData> comp_mdata = qm.QueryCompanies();
-		/*
-		if (comp_mdata.size() != 1)
-			throw new Exception("fromDB: QueryCompanies returned " + comp_mdata.size() + " companies ??");
-		*/
-		if (comp_mdata.size() > 1)
-		    comp.setMetadata(comp_mdata.get(1));
-		else
-		    comp.setMetadata(comp_mdata.get(0));
-
-		if (comp.getFyStart() == null) {
-			
-			if (comp.getQbnName().indexOf("LGL Administrative Services") >= 0) {
-				SimpleDateFormat sdf = new SimpleDateFormat("MM-dd");
-				Calendar fy = Calendar.getInstance();
-				fy.setTime(sdf.parse("01-01"));
-				comp.setFyStart(fy);
-				
-				System.out.println("Overwriting FY Start as: "+sdf.format(comp.getFyStart().getTime()));
+		found = false;
+		for (CompanyMetaData cmd : comp_mdata) {
+			if (cmd.getQBNRegisteredCompanyName() != null &&
+					cmd.getQBNRegisteredCompanyName().equals(qbn)) {
+				comp.setQbnName(qbn);
+				found = true;
+				break;
 			}
-			
-			// TODO: fill this with any other companies
-			
 		}
+		if (!found)
+			throw new Exception("GatherGL: unable to find QBN: "+qbn);
+		
+		// now, set fy start
+		comp.setFyStart(fyStart);
 		
 		// next, let's fill in the accounts
 		List<QBAccount> qb_accts = qm.QueryAccounts();
@@ -70,7 +64,19 @@ public class GatherGL {
 				continue;
 			}
 			gl_accts.add(new GLAccount(qb_acct));
+			if (qb_acct.getAcctNum().equals(ar_acct))
+				comp.setDefARacctNum(ar_acct);
+			if (qb_acct.getAcctNum().equals(ap_acct))
+				comp.setDefAPacctNum(ap_acct);
+			if (qb_acct.getAcctNum().equals(bank_acct))
+				comp.setDefBankAcctNum(bank_acct);
 		}
+		if (comp.getDefAPacctNum() == null)
+			throw new Exception("GatherGL: unable to find AP Acct: "+ap_acct);
+		if (comp.getDefARacctNum() == null)
+			throw new Exception("GatherGL: unable to find AR Acct: "+ar_acct);
+		if (comp.getDefBankAcctNum() == null)
+			throw new Exception("GatherGL: unable to find Def Bank Acct: "+bank_acct);
 		
 		// ok, finally we need to pull out the transactions
 		List<GLTrans> txns = qm.QueryTransactions(comp);
