@@ -3,6 +3,8 @@
 				com.intuit.utils.WebUtils,
                 java.text.SimpleDateFormat,
                 java.util.Calendar,
+                java.util.List,
+                java.util.Map,
 				com.intuit.query.QueryManager,
 				com.intuit.gl.data.GLAccount,
 				com.intuit.gl.data.GLCompany,
@@ -40,6 +42,26 @@
         if (fy_start == null)
             fy_start = comp.getFyStartString("MM-dd");
     }
+
+    PlatformSessionContext context = null;
+    QueryManager qm = null;
+    List<String> companies = null;
+    Map<String,String> accounts = null;
+
+    try {
+        String accesstoken = (String)session.getAttribute("accessToken");
+        String accessstokensecret = (String)session.getAttribute("accessTokenSecret");
+        String realmID = (String)session.getAttribute("realmId");
+        String dataSource = (String)session.getAttribute("dataSource");
+        context = webutils.getPlatformContext(accesstoken,accessstokensecret,realmID,dataSource);
+        qm = new QueryManager(context);
+
+        companies = qm.QueryCompanyNames();
+        accounts = qm.QueryAccountNumbers();
+    } catch (Exception ex) {
+        System.out.println("Uh oh, trouble");
+        ex.printStackTrace();
+    }
 %>
 
 <script src="<%= appcenter_url %>/Content/IA/intuit.ipp.anywhere.js" type="text/javascript"></script>
@@ -50,18 +72,100 @@
 <h3>Cole Intuit Accounting Suite: Refresh DB Snapshot</h3>
 <p><a href="intuit_login.jsp">Go Back</a></p>
 <form action="refresh_snapshot.jsp">
+
+
 <table>
     <tr><td><label for="txtCompName">Company Name:</label></td>
-        <td><input type="text" name="QBN" value="<%= (qbn==null ? "" : qbn) %>"></td></tr>
+        <td>      
+<%
+    if (companies != null) {
+        out.println("<select name=\"QBN\">");
+        out.print("<option value=\"UNKNOWN\"");
+        if (qbn == null || companies.indexOf(qbn)==-1)
+            out.print(" selected");
+        out.println(">(please select:)</option>");
+    
+        for (String qcomp : companies) {
+            out.print("<option value=\"" + qcomp + "\"");
+            if (qcomp.equals(qbn))
+                out.print(" selected");
+            out.println(">" + qcomp + "</option>");
+        }
+        out.println("</select>");
+    } else {
+        out.println("<input type=\"text\" name=\"QBN\" value=\"" + (qbn==null ? "" : qbn) + "\">");
+    }
+%>
+        </td></tr>
     
     <tr><td><label for="txtDefAPAcct">Def AP Acct:</label></td>
-        <td><input type="text" name="APAcct" value="<%= (ap_acct==null ? "" : ap_acct) %>"></td></tr>
+        <td>
+<%
+    if (accounts != null) {
+        out.println("<select name=\"APAcct\">");
+        out.print("<option value=\"UNKNOWN\"");
+        if (ap_acct == null || !accounts.containsKey(ap_acct))
+            out.print(" selected");
+        out.println(">(please select:)</option>");
+    
+        for (String qact : accounts.keySet()) {
+            out.print("<option value=\"" + qact + "\"");
+            if (qact.equals(ap_acct))
+                out.print(" selected");
+            out.println(">" + qact + " - " + accounts.get(qact) + "</option>");
+        }
+        out.println("</select>");
+    } else {
+        out.println("<input type=\"text\" name=\"APAcct\" value=\"" + (ap_acct==null ? "" : ap_acct) + "\">");
+    }
+%>
+        </td></tr>
     
     <tr><td><label for="txtDefARAcct">Def AR Acct:</label></td>
-        <td><input type="text" name="ARAcct" value="<%= (ar_acct==null ? "" : ar_acct) %>"></td></tr>
+        <td>
+<%
+    if (accounts != null) {
+        out.println("<select name=\"ARAcct\">");
+        out.print("<option value=\"UNKNOWN\"");
+        if (ar_acct == null || !accounts.containsKey(ar_acct))
+            out.print(" selected");
+        out.println(">(please select:)</option>");
+    
+        for (String qact : accounts.keySet()) {
+            out.print("<option value=\"" + qact + "\"");
+            if (qact.equals(ar_acct))
+                out.print(" selected");
+            out.println(">" + qact + " - " + accounts.get(qact) + "</option>");
+        }
+        out.println("</select>");
+    } else {
+        out.println("<input type=\"text\" name=\"ARAcct\" value=\"" + (ar_acct==null ? "" : ar_acct) + "\">");
+    }
+%>       
+        </td></tr>
 
     <tr><td><label for="txtDefBankAcct">Def Bank Acct:</label></td>
-        <td><input type="text" name="DefBankAcct" value="<%= (bank_acct==null ? "" : bank_acct) %>"></td></tr>
+        <td>
+<%
+    if (accounts != null) {
+        out.println("<select name=\"DefBankAcct\">");
+        out.print("<option value=\"UNKNOWN\"");
+        if (bank_acct == null || !accounts.containsKey(bank_acct))
+            out.print(" selected");
+        out.println(">(please select:)</option>");
+    
+        for (String qact : accounts.keySet()) {
+            out.print("<option value=\"" + qact + "\"");
+            if (qact.equals(bank_acct))
+                out.print(" selected");
+            out.println(">" + qact + " - " + accounts.get(qact) + "</option>");
+        }
+        out.println("</select>");
+    } else {
+        out.println("<input type=\"text\" name=\"DefBankAcct\" value=\"" + (bank_acct==null ? "" : bank_acct) + "\">");
+    }
+%>         
+        </td></tr>
 
     <tr><td><label for="txtFyStart">FY Start:</label></td>
         <td><input type="text" name="FYStart" value="<%= (fy_start==null ? "mm-dd" : fy_start) %>"></td></tr>
@@ -80,13 +184,13 @@
 				// check valid dates
 				fyCal.setTime(sdf.parse(fy_start));
 
-				if (qbn.length() == 0)
+				if (qbn.length() == 0 || qbn.equals("UNKNOWN"))
 					throw new Exception("Please enter Company QBN");
-                if (ap_acct.length() == 0)
+                if (ap_acct.length() == 0 || ap_acct.equals("UNKNOWN"))
 					throw new Exception("Please enter AP Acct#");
-				if (ar_acct.length() == 0)
+				if (ar_acct.length() == 0 || ar_acct.equals("UNKNOWN"))
 					throw new Exception("Please enter AR Acct#");
-                if (bank_acct.length() == 0)
+                if (bank_acct.length() == 0 || bank_acct.equals("UNKNOWN"))
 					throw new Exception("Please enter Def Bank Acct#");
 			} catch (Exception ex) {
                 System.out.println("ERROR: "+ex.getMessage());
@@ -102,14 +206,7 @@
                 System.out.println("\tDef Bank Acct -> "+bank_acct);
                 System.out.println("\tFY Start -> "+fy_start);
 
-           		String accesstoken = (String)session.getAttribute("accessToken");
-        		String accessstokensecret = (String)session.getAttribute("accessTokenSecret");
-        		String realmID = (String)session.getAttribute("realmId");
-        		String dataSource = (String)session.getAttribute("dataSource");
-        		PlatformSessionContext context = webutils.getPlatformContext(accesstoken,accessstokensecret,realmID,dataSource);
-		
-	        	QueryManager qm = new QueryManager(context);
-	      	    comp = GatherGL.fromDB(qm, qbn, ap_acct, ar_acct, bank_acct, fyCal);
+   	      	    comp = GatherGL.fromDB(qm, qbn, ap_acct, ar_acct, bank_acct, fyCal);
    	     	    GatherGL.pushToDisk(comp, gl_file);
     	    	System.out.println("Wrote GL Serialized File: "+gl_file);
 

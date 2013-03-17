@@ -23,6 +23,16 @@ public class QueryManager {
 		System.out.println("QueryCompanies: returned " + mdata.size() + " companies");
 		return mdata;
 	}
+	
+	public List<String> QueryCompanyNames() throws Exception {
+		List<String> names = new ArrayList<String>();
+		List<CompanyMetaData> mdatas = QueryCompanies();
+		for (CompanyMetaData mdata : mdatas) {
+			if (mdata != null && mdata.getQBNRegisteredCompanyName() != null)
+				names.add(mdata.getQBNRegisteredCompanyName());
+		}
+		return names;
+	}
 
 	public List<QBAccount> QueryAccounts() throws Exception {
 
@@ -53,6 +63,21 @@ public class QueryManager {
 
 		System.out.println("QueryAccounts: returned " + accounts.size() + " accounts");
 		return accounts;
+	}
+	
+	public Map<String,String> QueryAccountNumbers() throws Exception {
+		Map<String,String> accts = new Hashtable<String,String>();
+		List<QBAccount> qaccts = QueryAccounts();
+		for (QBAccount qacct : qaccts) {
+			if (qacct == null)
+				continue;
+			if (qacct.getAcctNum() == null)
+				continue;
+			if (qacct.getName() == null)
+				continue;
+			accts.put(qacct.getAcctNum(), qacct.getName());
+		}
+		return accts;
 	}
 	
 	public QBAccount GetAccount(String acctnum) throws Exception {
